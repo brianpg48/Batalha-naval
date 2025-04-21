@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Batalha Naval</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding-top: 30px;
+    }
+    table {
+      margin: 0 auto;
+      border-collapse: collapse;
+    }
+    td {
+      width: 50px;
+      height: 50px;
+      border: 2px solid #333;
+      background-color: #9ec5e6;
+      cursor: pointer;
+      font-size: 24px;
+      text-align: center;
+      vertical-align: middle;
+    }
+    td.acertou {
+      background-color: green;
+      color: white;
+    }
+    td.errou {
+      background-color: red;
+      color: white;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    #mensagem {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Batalha Naval</h1>
+  <p>Clique nas células para encontrar os navios escondidos! (5 no total)</p>
+  <table id="tabuleiro"></table>
+  <p id="mensagem"></p>
+
+  <script>
+    const TAMANHO = 5;
+    const navios = 5;
+    let tabuleiro = [];
+    let acertos = 0;
+    let tiros = 0;
+    const maxTiros = 10;
+
+    function iniciarJogo() {
+      for (let l = 0; l < TAMANHO; l++) {
+        tabuleiro[l] = [];
+        for (let c = 0; c < TAMANHO; c++) {
+          tabuleiro[l][c] = false;
+        }
+      }
+
+      let colocados = 0;
+      while (colocados < navios) {
+        let l = Math.floor(Math.random() * TAMANHO);
+        let c = Math.floor(Math.random() * TAMANHO);
+        if (!tabuleiro[l][c]) {
+          tabuleiro[l][c] = true;
+          colocados++;
+        }
+      }
+    }
+
+    function criarTabuleiroHTML() {
+      const tabela = document.getElementById('tabuleiro');
+      for (let l = 0; l < TAMANHO; l++) {
+        let linha = document.createElement('tr');
+        for (let c = 0; c < TAMANHO; c++) {
+          let celula = document.createElement('td');
+          celula.dataset.linha = l;
+          celula.dataset.coluna = c;
+          celula.addEventListener('click', atirar);
+          linha.appendChild(celula);
+        }
+        tabela.appendChild(linha);
+      }
+    }
+
+    function atirar(event) {
+      let celula = event.target;
+      let l = parseInt(celula.dataset.linha);
+      let c = parseInt(celula.dataset.coluna);
+
+      if (celula.classList.contains('acertou') || celula.classList.contains('errou')) return;
+
+      tiros++;
+
+      if (tabuleiro[l][c]) {
+        celula.classList.add('acertou');
+        acertos++;
+        mostrarMensagem("ACERTOU!");
+      } else {
+        celula.classList.add('errou');
+        mostrarMensagem("Errou... tente novamente.");
+      }
+
+      if (acertos === navios) {
+        mostrarMensagem("Você venceu!");
+        desativarTabuleiro();
+      } else if (tiros >= maxTiros) {
+        mostrarMensagem("💀 Fim de jogo! Você usou todos os tiros.");
+        desativarTabuleiro();
+      }
+    }
+
+    function mostrarMensagem(msg) {
+      document.getElementById('mensagem').textContent = msg;
+    }
+
+    function desativarTabuleiro() {
+      let celulas = document.querySelectorAll('td');
+      celulas.forEach(cel => cel.removeEventListener('click', atirar));
+    }
+
+    iniciarJogo();
+    criarTabuleiroHTML();
+  </script>
+
+</body>
+</html>
